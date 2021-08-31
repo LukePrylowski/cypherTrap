@@ -7,15 +7,17 @@ Current model support:
 Installing
 
 Clone repository to local machine. 
-
+```
 cd /usr/src/
 git clone https://github.com/Prohighsolutions/cypherTrap.git
 
 cd cypherTrap
 cp getTrap.sh /etc/snmp/
+
 chmod +x /etc/snmp/getTrap.sh
 
 echo "traphandle default /etc/snmp/getTrap.sh" >> /etc/snmp/snmptrapd.conf
+```
 
 Restart snmptrapd daemon
 
