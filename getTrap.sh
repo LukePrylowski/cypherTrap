@@ -30,6 +30,7 @@ function setWiFi()
     local t=$5
 
     if [[ $t == "TC7230" ]]; then
+
 	snmpset -v2c -c ${comm} ${i} .1.3.6.1.4.1.2863.205.30.1.1.2.1.1.2.${n} i: 1
 	snmpset -v2c -c ${comm} ${i} .1.3.6.1.4.1.2863.205.30.1.1.2.1.1.3.${n} s: "${nt}"
         snmpset -v2c -c ${comm} ${i} .1.3.6.1.4.1.2863.205.30.1.1.2.1.1.4.${n} i:7
@@ -49,18 +50,19 @@ do
 
     count=$[count+1]
 
-#    echo "${oid} ${val}" >> ${log}
-
     if [[ ${oid} == ".1.3.6.1.2.1.10.127.1.3.3.1.3."* ]]; then
-	ip=`echo ${val} | sed 's/\"//g'`
+
+	ip=`echo ${val} | xargs | sed 's/\"//g'`
     fi;
 
     if [[ ${oid} == ".1.3.6.1.2.1.10.127.1.3.3.1.2."* ]]; then
+
 	mac=`echo ${val} | xargs | awk '{print($1$2$3$4$5$6)}'`
     fi;
 
     if [[ ${oid} == ".1.3.6.1.4.1.20858.10.22.2.1.1.1."* ]]; then
-        state=${val}
+
+        state=`echo ${val} | xargs` 
     fi;
     
 done
@@ -75,9 +77,13 @@ if [ ${state} -eq 8 ] && [[ ${ip} != "0.0.0.0" ]] && [[ ${mac} != "000000000000"
 
 	    net24=`snmpget -Onqv -v2c -c ${comm} $ip .1.3.6.1.4.1.2863.205.30.1.1.2.1.1.3.32 | sed 's/\"//g'`
 	    net50=`snmpget -Onqv -v2c -c ${comm} $ip .1.3.6.1.4.1.2863.205.30.1.1.2.1.1.3.112 | sed 's/\"//g'`
+	else
+	    
+	    net24=""
+	    net50=""
 	fi;
     
-	if [[ ${net24} != "" ]] && [[ ${net50} != "" ]]; then
+	if [[ ${net24} != "" ]]; then
 
 	    if [[ ${net24} != ${wifi}_${mac: -4} ]]; then
 
@@ -91,6 +97,9 @@ if [ ${state} -eq 8 ] && [[ ${ip} != "0.0.0.0" ]] && [[ ${mac} != "000000000000"
 
     		echo "${now}: CM ${ip} ${mac} ${type} WiFi 2.4GHz is OK" >> ${log}
 	    fi;
+	fi;
+	
+	if [[ ${net50} != "" ]]; then
 
 	    if [[ ${net50} != ${wifi}_5G_${mac: -4} ]]; then
 
@@ -104,7 +113,9 @@ if [ ${state} -eq 8 ] && [[ ${ip} != "0.0.0.0" ]] && [[ ${mac} != "000000000000"
 
     		echo "${now}: CM ${ip} ${mac} ${type} WiFi 5GHz is OK" >> ${log}
 	    fi;
-	else
+	fi;
+	
+	if [[ ${net24} == "" ]] && [[ ${net50} == "" ]]; then
 
 	    now=$(getDate)
 	    echo "${now}: CM ${ip} ${mac} ${type} not checking..." >> ${log}
