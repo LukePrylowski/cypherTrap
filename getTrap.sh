@@ -12,6 +12,8 @@ mac="0000000000"
 type=""
 wifi="NetWiFi"
 sn=""
+net24=""
+net50=""
 
 function getDate()
 {
@@ -65,40 +67,53 @@ done
 
 if [ ${state} -eq 8 ] && [[ ${ip} != "0.0.0.0" ]] && [[ ${mac} != "000000000000" ]]; then
     type=`snmpget -v2c -c ${comm} -Onqv $ip .1.3.6.1.2.1.1.1.0 | awk -F 'MODEL: ' '{print($2)}' | sed 's/>>\"//g'`
-fi;
 
-if [[ ${type} != "" ]]; then
 
-    if [[ ${type} == "TC7230" ]]; then
+    if [[ ${type} != "" ]]; then
 
-	net24=`snmpget -Onqv -v2c -c ${comm} $ip .1.3.6.1.4.1.2863.205.30.1.1.2.1.1.3.32 | sed 's/\"//g'`
-	now=$(getDate)
+	if [[ ${type} == "TC7230" ]]; then
 
-	if [[ ${net24} != ${wifi}__${mac: -4} ]]; then
-	    echo "${now}: CM ${ip} ${mac} ${type} wrong WiFi 2.4GHz ${net24}" >> ${log}
-	    echo "${now}: CM ${ip} ${mac} ${type} getting SN..." >> ${log}
-	    getSn ${ip}
-	    echo "${now}: CM ${ip} ${mac} ${type} Wifi 2.4GHz is being updated" >> ${log}
-	    setWiFi ${ip} 32 "${wifi}_${mac: -4}" "${sn}" "${type}"
-	else
-	    echo "${now}: CM ${ip} ${mac} ${type} WiFi 2.4GHz is OK" >> ${log}
+	    net24=`snmpget -Onqv -v2c -c ${comm} $ip .1.3.6.1.4.1.2863.205.30.1.1.2.1.1.3.32 | sed 's/\"//g'`
+	    net50=`snmpget -Onqv -v2c -c ${comm} $ip .1.3.6.1.4.1.2863.205.30.1.1.2.1.1.3.112 | sed 's/\"//g'`
 	fi;
+    
+	if [[ ${net24} != "" ]] && [[ ${net50} != "" ]]; then
 
-	net50=`snmpget -Onqv -v2c -c ${comm} $ip .1.3.6.1.4.1.2863.205.30.1.1.2.1.1.3.112 | sed 's/\"//g'`
-	now=$(getDate)
+	    if [[ ${net24} != ${wifi}_${mac: -4} ]]; then
 
-	if [[ ${net50} != ${wifi}_5G_${mac: -4} ]]; then
-	    echo "${now}: CM ${ip} ${mac} ${type} wrong WiFi 5GHz ${net50}" >> ${log}
-	    echo "${now}: CM ${ip} ${mac} ${type} getting SN..." >> ${log}
-	    getSn ${ip}
-	    echo "${now}: CM ${ip} ${mac} ${type} Wifi 5GHz is being updated" >> ${log}
-	    setWiFi ${ip} 112 "${wifi}_5G_${mac: -4}" "${sn}" "${type}"
+		now=$(getDate)
+    		echo "${now}: CM ${ip} ${mac} ${type} wrong WiFi 2.4GHz ${net24}" >> ${log}
+        	echo "${now}: CM ${ip} ${mac} ${type} getting SN..." >> ${log}
+		getSn ${ip}
+    		echo "${now}: CM ${ip} ${mac} ${type} Wifi 2.4GHz is being updated" >> ${log}
+    		setWiFi ${ip} 32 "${wifi}_${mac: -4}" "${sn}" "${type}"
+	    else
+
+    		echo "${now}: CM ${ip} ${mac} ${type} WiFi 2.4GHz is OK" >> ${log}
+	    fi;
+
+	    if [[ ${net50} != ${wifi}_5G_${mac: -4} ]]; then
+
+		now=$(getDate)
+    		echo "${now}: CM ${ip} ${mac} ${type} wrong WiFi 5GHz ${net50}" >> ${log}
+    		echo "${now}: CM ${ip} ${mac} ${type} getting SN..." >> ${log}
+    		getSn ${ip}
+    		echo "${now}: CM ${ip} ${mac} ${type} Wifi 5GHz is being updated" >> ${log}
+    		setWiFi ${ip} 112 "${wifi}_5G_${mac: -4}" "${sn}" "${type}"
+	    else
+
+    		echo "${now}: CM ${ip} ${mac} ${type} WiFi 5GHz is OK" >> ${log}
+	    fi;
 	else
-	    echo "${now}: CM ${ip} ${mac} ${type} WiFi 5GHz is OK" >> ${log}
+
+	    now=$(getDate)
+	    echo "${now}: CM ${ip} ${mac} ${type} not checking..." >> ${log}
 	fi;
-    else
-	now=$(getDate)
-	echo "${now}: CM ${ip} ${mac} ${type} not checking..." >> ${log}
     fi;
+else
+
+    now=$(getDate)
+    echo "${now}: CM ${ip} ${mac} ${type} some parameters missing. Can not processing..." >> ${log}
 fi;
+
 
