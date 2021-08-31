@@ -29,7 +29,7 @@ function setWiFi()
     local p=$4
     local t=$5
 
-    if [[ $t == "TC7230" ]]; then
+    if [[ $t == "TC7230"* ]]; then
 
 	snmpset -v2c -c ${comm} ${i} .1.3.6.1.4.1.2863.205.30.1.1.2.1.1.2.${n} i: 1
 	snmpset -v2c -c ${comm} ${i} .1.3.6.1.4.1.2863.205.30.1.1.2.1.1.3.${n} s: "${nt}"
@@ -73,7 +73,7 @@ if [ ${state} -eq 8 ] && [[ ${ip} != "0.0.0.0" ]] && [[ ${mac} != "000000000000"
 
     if [[ ${type} != "" ]]; then
 
-	if [[ ${type} == "TC7230" ]]; then
+	if [[ ${type} == "TC7230"* ]]; then
 
 	    net24=`snmpget -Onqv -v2c -c ${comm} $ip .1.3.6.1.4.1.2863.205.30.1.1.2.1.1.3.32 | sed 's/\"//g'`
 	    net50=`snmpget -Onqv -v2c -c ${comm} $ip .1.3.6.1.4.1.2863.205.30.1.1.2.1.1.3.112 | sed 's/\"//g'`
@@ -95,6 +95,7 @@ if [ ${state} -eq 8 ] && [[ ${ip} != "0.0.0.0" ]] && [[ ${mac} != "000000000000"
     		setWiFi ${ip} 32 "${wifi}_${mac: -4}" "${sn}" "${type}"
 	    else
 
+		now=$(getDate)
     		echo "${now}: CM ${ip} ${mac} ${type} WiFi 2.4GHz is OK" >> ${log}
 	    fi;
 	fi;
@@ -111,6 +112,7 @@ if [ ${state} -eq 8 ] && [[ ${ip} != "0.0.0.0" ]] && [[ ${mac} != "000000000000"
     		setWiFi ${ip} 112 "${wifi}_5G_${mac: -4}" "${sn}" "${type}"
 	    else
 
+		now=$(getDate)
     		echo "${now}: CM ${ip} ${mac} ${type} WiFi 5GHz is OK" >> ${log}
 	    fi;
 	fi;
