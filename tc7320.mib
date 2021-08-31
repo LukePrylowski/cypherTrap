@@ -1,0 +1,13 @@
+2.4GHz
+cgWifiBssEnable.32 Integer 1 ;  // Enable .1.3.6.1.4.1.2863.205.30.1.1.2.1.1.2
+cgWifiBssSsid.32 String "Net-2.4GHz" ;  // Network name .1.3.6.1.4.1.2863.205.30.1.1.2.1.1.3
+SnmpMibObject cgWifiBssSecurityMode.32 Integer 7 ;  // WPA .1.3.6.1.4.1.2863.205.30.1.1.2.1.1.4
+SnmpMibObject cgWifiBssWpaPreSharedKey.32 String "test1234" ;  // Password .1.3.6.1.4.1.2863.205.30.1.1.2.3.4.1.2
+SnmpMibObject cg802dot11ApplySettings.0 Integer 1 ;  // Apply changes .1.3.6.1.4.1.2863.205.10.1.30.100
+
+5.0GHz
+cgWifiBssEnable.112 Integer 1 ;  // Enable
+cgWifiBssSsid.112 String "Net-5GHz" ;  // Network name
+SnmpMibObject cgWifiBssSecurityMode.112 Integer 7 ;  // WPA
+SnmpMibObject cgWifiBssWpaPreSharedKey.112 String "test1234" ;  // Password
+SnmpMibObject cg802dot11ApplySettings.0 Integer 1 ;  // Apply changes
