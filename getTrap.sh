@@ -110,10 +110,6 @@ if [ ${state} -eq 8 ] && [[ ${ip} != "0.0.0.0" ]] && [[ ${mac} != "000000000000"
 	    echo "${now}: CM ${ip} ${mac} ${type} not checking..." >> ${log}
 	fi;
     fi;
-else
-
-    now=$(getDate)
-    echo "${now}: CM ${ip} ${mac} ${type} some parameters missing. Can not processing..." >> ${log}
 fi;
 
 
