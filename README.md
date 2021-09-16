@@ -3,8 +3,9 @@ cypherTrap
 Bash script to cyphering WiFi of DOCSIS cable modem based on traps sent by CMTS/CCAP
  
 Current model support:
- - TC7230
- 
+ - TC7230*
+ - TC7210*
+  
 Installing
  
 ```
