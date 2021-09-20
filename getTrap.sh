@@ -55,14 +55,13 @@ if [ ${state} -eq 8 ] && [[ ${ip} != "0.0.0.0" ]] && [[ ${mac} != "000000000000"
 
     type=`snmpget -v2c -c ${comm} -Onqv $ip .1.3.6.1.2.1.1.1.0 | awk -F 'MODEL: ' '{print($2)}' | sed 's/>>\"//g'`
 
-    path=`pwd`
+    if [[ ${type} != "" ]] && [[ -f "/etc/snmp/conf.d/${type}" ]]; then
 
-    if [[ ${type} != "" ]] && [ -f ${path}/conf.d/${type} ]; then
-
-	. ${path}/conf.d/${type}
+	. /etc/snmp/conf.d/${type}
 
 	if [ ${#setMibs[@]} -gt 0 ]; then
 
+	    now=$(getDate)
     	    echo "${now}: CM ${ip} ${mac} ${type} setting online MIBs" >> ${log}
 	    
 	    for i in "${!onlineMibs[@]}"; do
