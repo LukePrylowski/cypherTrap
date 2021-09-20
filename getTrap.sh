@@ -59,7 +59,7 @@ if [ ${state} -eq 8 ] && [[ ${ip} != "0.0.0.0" ]] && [[ ${mac} != "000000000000"
 
 	. /etc/snmp/conf.d/${type}
 
-	if [ ${#setMibs[@]} -gt 0 ]; then
+	if [ ${#onlineMibs[@]} -gt 0 ]; then
 
 	    now=$(getDate)
     	    echo "${now}: CM ${ip} ${mac} ${type} setting online MIBs" >> ${log}
