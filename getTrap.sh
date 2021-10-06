@@ -26,7 +26,13 @@ function getDate()
 function getSn()
 {
     sn=`snmpget -Onvq -v2c -c ${comm} $1 1.3.6.1.2.1.69.1.1.4.0 | sed 's/\"//g'`
-    
+    echo ${sn}
+}
+
+function getType()
+{
+    type=`snmpget -Oqvn -v2c -c ${comm} $1 .1.3.6.1.2.1.1.1.0 | awk -F 'MODEL: ' '{print($2)}' | sed 's/>>\"//g'`
+    echo ${type}
 }
 
 while read oid val
@@ -53,9 +59,14 @@ done
 
 if [ ${state} -eq 8 ] && [[ ${ip} != "0.0.0.0" ]] && [[ ${mac} != "000000000000" ]]; then
 
-    type=`snmpget -v2c -c ${comm} -Onqv $ip .1.3.6.1.2.1.1.1.0 | awk -F 'MODEL: ' '{print($2)}' | sed 's/>>\"//g'`
+    type=`getType ${ip}`
+
 
     if [[ ${type} != "" ]] && [[ -f "/etc/snmp/conf.d/${type}" ]]; then
+
+	now=$(getDate)
+        echo "${now}: CM ${ip} ${mac} ${type} getting SN..." >> ${log}	
+	sn=`getSn ${ip}`
 
 	. /etc/snmp/conf.d/${type}
 
@@ -77,20 +88,20 @@ if [ ${state} -eq 8 ] && [[ ${ip} != "0.0.0.0" ]] && [[ ${mac} != "000000000000"
 
 		if [[ ${tmp} != "" ]] && [[ ${tmp} != ${checkVals[i]} ]]; then
 
-		    IFS="|"
-
-		    mibs=${checkMibs[i]}
-		    types=${checkType[i]}
-		    values=${checkVals[i]}
-
 		    now=$(getDate)
     		    echo "${now}: CM ${ip} ${mac} ${type} wrong ${checkMibs[i]}, current: ${tmp}, expected: ${checkVals[i]}" >> ${log}
         	    echo "${now}: CM ${ip} ${mac} ${type} getting SN..." >> ${log}
-		    getSn ${ip}
-    		    echo "${now}: CM ${ip} ${mac} ${type} ${checkMibs[i]} is being updated" >> ${log}
+		    sn=`getSn ${ip}`
+    		    echo "${now}: CM ${ip} ${mac} ${type} ${checkMibs[i]} SN: ${sn} is being updated" >> ${log}
+
+		    IFS='|' read -r -a mibs <<< "${setMibs[i]}"
+		    IFS='|' read -r -a types <<< "${setType[i]}"
+		    IFS='|' read -r -a values <<< "${setVals[i]}"
 
 		    
-		    for mib in "${!mibss[@]}"; do
+		    for mib in "${!mibs[@]}"; do
+			now=$(getDate)
+			echo "${now}: snmpset -v2c -c ${comm} ${ip} ${mibs[mib]} ${types[mib]}: ${values[mib]}" >> ${log}
 			snmpset -v2c -c ${comm} ${ip} ${mibs[mib]} ${types[mib]}: ${values[mib]}
 		    done;
 		else
@@ -104,3 +115,4 @@ if [ ${state} -eq 8 ] && [[ ${ip} != "0.0.0.0" ]] && [[ ${mac} != "000000000000"
         echo "${now}: CM ${ip} ${mac} ${type} not checking..." >> ${log}
     fi;
 fi;
+
